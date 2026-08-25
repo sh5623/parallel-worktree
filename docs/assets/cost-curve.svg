@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 380" width="740" height="380" role="img" aria-labelledby="t d">
+  <title id="t">Orchestrator context integral against turn count</title>
+  <desc id="d">The context integral grows quadratically with turn count. At n=319 turns it reaches 68.0M; at n=30 turns it is 2.3M, a 97 percent reduction. Single sample.</desc>
+  <style>
+    .ax  { stroke:#7d8590; stroke-width:1.2; fill:none }
+    .gr  { stroke:#7d8590; stroke-width:.6; opacity:.22; fill:none }
+    .lbl { fill:#7d8590; font:400 12px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
+    .ttl { fill:#7d8590; font:600 13px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
+    .cur { stroke:#f85149; stroke-width:2.4; fill:none; stroke-linejoin:round }
+    .fillhi { fill:#f85149; opacity:.13 }
+    .filllo { fill:#3fb950; opacity:.30 }
+    .mk  { stroke:#7d8590; stroke-width:1; stroke-dasharray:3 3 }
+    .hi  { fill:#f85149; font:600 12px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
+    .lo  { fill:#3fb950; font:600 12px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
+    .mono{ fill:#7d8590; font:400 11px ui-monospace,SFMono-Regular,Menlo,monospace }
+  </style>
+
+  <text class="ttl" x="70" y="24">∫context = c₀·n + g·n²/2</text>
+  <text class="mono" x="70" y="42">c₀ = 62K · g = 947   (single sample, n=1 — measure your own)</text>
+
+  <!-- grid -->
+  <line class="gr" x1="70" y1="300" x2="690" y2="300"/>
+  <line class="gr" x1="70" y1="234" x2="690" y2="234"/>
+  <line class="gr" x1="70" y1="168" x2="690" y2="168"/>
+  <line class="gr" x1="70" y1="102" x2="690" y2="102"/>
+  <line class="gr" x1="70" y1="36"  x2="690" y2="36"/>
+
+  <!-- area under curve -->
+  <path class="fillhi" d="M70,300 L147.7,287.5 L225.5,269.2 L303.2,245.0 L380.9,215.0 L458.7,179.1 L536.4,137.4 L614.2,89.9 L690,37.9 L690,300 Z"/>
+  <path class="filllo" d="M70,300 L100,295.5 L128.3,291.2 L128.3,300 Z"/>
+
+  <!-- curve -->
+  <path class="cur" d="M70,300 L147.7,287.5 L225.5,269.2 L303.2,245.0 L380.9,215.0 L458.7,179.1 L536.4,137.4 L614.2,89.9 L690,37.9"/>
+
+  <!-- axes -->
+  <line class="ax" x1="70" y1="300" x2="700" y2="300"/>
+  <line class="ax" x1="70" y1="300" x2="70"  y2="30"/>
+
+  <!-- y labels -->
+  <text class="lbl" x="62" y="304" text-anchor="end">0</text>
+  <text class="lbl" x="62" y="238" text-anchor="end">17M</text>
+  <text class="lbl" x="62" y="172" text-anchor="end">35M</text>
+  <text class="lbl" x="62" y="106" text-anchor="end">52M</text>
+  <text class="lbl" x="62" y="40"  text-anchor="end">70M</text>
+  <text class="lbl" x="18" y="176" transform="rotate(-90 18 176)" text-anchor="middle">∫ context (tokens)</text>
+
+  <!-- x labels -->
+  <text class="lbl" x="70"  y="320" text-anchor="middle">0</text>
+  <text class="lbl" x="225" y="320" text-anchor="middle">80</text>
+  <text class="lbl" x="381" y="320" text-anchor="middle">160</text>
+  <text class="lbl" x="536" y="320" text-anchor="middle">240</text>
+  <text class="lbl" x="690" y="320" text-anchor="middle">319</text>
+  <text class="lbl" x="380" y="342" text-anchor="middle">n — assistant turns</text>
+
+  <!-- markers -->
+  <line class="mk" x1="690" y1="37.9" x2="690" y2="300"/>
+  <circle cx="690" cy="37.9" r="4" fill="#f85149"/>
+  <text class="hi" x="682" y="30" text-anchor="end">n = 319 → ∫ 68.0M</text>
+  <text class="mono" x="682" y="48" text-anchor="end">~290 turns were chores while waiting</text>
+
+  <circle cx="128.3" cy="291.2" r="4" fill="#3fb950"/>
+  <text class="lo"  x="140" y="284">n = 30 → ∫ 2.3M</text>
+  <text class="mono" x="140" y="300">dispatch + harvest only  →  97% less</text>
+
+  <text class="mono" x="380" y="366" text-anchor="middle">The gap is not what you wrote — it is how many times the same context was re-read.</text>
+</svg>

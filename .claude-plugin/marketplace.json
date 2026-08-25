@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "parallel-worktree",
+  "description": "Run subagents in parallel across isolated worktrees and harvest the finished ones upstream, one at a time.",
+  "owner": {
+    "name": "Seungho",
+    "email": "seungho5623@gmail.com"
+  },
+  "plugins": [
+    {
+      "name": "parallel-worktree",
+      "description": "Orchestrate parallel subagents in isolated git worktrees — bootstrap, dispatch, harvest, and the failure modes a green gate cannot see. Harness- and stack-agnostic.",
+      "source": "./",
+      "category": "engineering",
+      "tags": ["git-worktree", "parallel", "subagents", "orchestration", "workflow", "harness"]
+    }
+  ]
+}
