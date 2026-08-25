@@ -1,29 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 250" width="740" height="250" role="img" aria-labelledby="t2 d2">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 268" width="740" height="268" role="img" aria-labelledby="t2 d2">
   <title id="t2">Where the context integral and the money actually go</title>
   <desc id="d2">Of the context integral, the quadratic term is 71 percent and the session floor 29 percent. Of the billing, cache reads are 64 percent, cache writes 30 percent, and output 6 percent. Single sample.</desc>
   <style>
     .ttl { fill:#7d8590; font:600 13px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
-    .lbl { fill:#7d8590; font:400 12px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
     .mono{ fill:#7d8590; font:400 11px ui-monospace,SFMono-Regular,Menlo,monospace }
     .in  { fill:#ffffff; font:600 12px ui-sans-serif,-apple-system,Segoe UI,Roboto,sans-serif }
   </style>
 
-  <text class="ttl" x="20" y="24">Where the ∫ goes — the n² term dominates</text>
+  <text class="ttl" x="20" y="24">Where the ∫ goes: the n² term dominates</text>
   <rect x="20"  y="38" width="180" height="34" rx="4" fill="#58a6ff"/>
   <rect x="200" y="38" width="440" height="34" rx="4" fill="#f85149"/>
-  <text class="in" x="110" y="60" text-anchor="middle">c₀·n — 29%</text>
-  <text class="in" x="420" y="60" text-anchor="middle">g·n²/2 — 71%</text>
-  <text class="mono" x="652" y="60">n is the lever</text>
+  <text class="in" x="110" y="60" text-anchor="middle">c₀·n : 29%</text>
+  <text class="in" x="420" y="60" text-anchor="middle">g·n²/2 : 71%</text>
+  <text class="mono" x="20" y="92">n is the lever, and it is the one you control.</text>
 
-  <text class="ttl" x="20" y="112">Where the money goes — you pay to re-read, not to write</text>
-  <rect x="20"  y="126" width="397" height="34" rx="4" fill="#f85149"/>
-  <rect x="417" y="126" width="186" height="34" rx="4" fill="#d29922"/>
-  <rect x="603" y="126" width="37"  height="34" rx="4" fill="#3fb950"/>
-  <text class="in" x="218" y="148" text-anchor="middle">cache read — 64%</text>
-  <text class="in" x="510" y="148" text-anchor="middle">cache write — 30%</text>
-  <text class="mono" x="652" y="148">output 6%</text>
+  <text class="ttl" x="20" y="128">Where the money goes: you pay to re-read, not to write</text>
+  <rect x="20"  y="142" width="397" height="34" rx="4" fill="#f85149"/>
+  <rect x="417" y="142" width="186" height="34" rx="4" fill="#d29922"/>
+  <rect x="603" y="142" width="37"  height="34" rx="4" fill="#3fb950"/>
+  <text class="in" x="218" y="164" text-anchor="middle">cache read : 64%</text>
+  <text class="in" x="510" y="164" text-anchor="middle">cache write : 30%</text>
+  <text class="mono" x="652" y="164">output 6%</text>
 
-  <text class="ttl" x="20" y="200">Turn count beats big tool results</text>
-  <text class="mono" x="20" y="220">The 12 turns that grew context most were only 29% of total growth (89K / 302K).</text>
-  <text class="mono" x="20" y="238">All tool results together: 0.4 MB.  Every turn added ~947 tokens, 319 times, quadratically.</text>
+  <text class="ttl" x="20" y="216">Turn count beats big tool results</text>
+  <text class="mono" x="20" y="236">The 12 turns that grew context most were only 29% of total growth (89K / 302K).</text>
+  <text class="mono" x="20" y="254">All tool results together: 0.4 MB. Every turn added ~947 tokens, 319 times, quadratically.</text>
 </svg>

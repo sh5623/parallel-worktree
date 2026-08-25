@@ -70,6 +70,28 @@ this skill's whole premise is that the failure modes are the ones you do not not
 Commit messages: a short imperative subject, and a body that says what changed and why. If the
 change is driven by a measurement, put the number in the body.
 
+## Editing the diagrams
+
+The SVGs in `docs/assets/` are hand-authored, and SVG `<text>` does not wrap. A line that outgrows
+its container is not an error: it renders clipped at the viewBox edge and looks fine in a diff.
+
+**Render before you commit a diagram change.** Do not estimate the width, and do not trust a preview
+that scales the image:
+
+```bash
+"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+  --headless --disable-gpu --hide-scrollbars \
+  --window-size=740,380 \
+  --screenshot=/tmp/out.png \
+  "file://$PWD/docs/assets/cost-curve.svg"
+```
+
+Match `--window-size` to that file's `viewBox`, then look at the PNG. Check three things: no line is
+clipped at the right edge, no label collides with a neighbour, and no plotted line runs through a
+label. If a line does not fit, split it into two `<text>` elements and grow the container plus the
+`viewBox` to match. Keep about 8px of clearance from the right edge, and use a dashed leader line
+when a callout has to sit away from the point it labels.
+
 ## Scope
 
 In scope: the pipeline (bootstrap, dispatch, harvest, resume, cleanup), its failure modes, the

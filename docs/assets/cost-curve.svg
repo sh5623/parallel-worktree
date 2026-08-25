@@ -16,7 +16,7 @@
   </style>
 
   <text class="ttl" x="70" y="24">∫context = c₀·n + g·n²/2</text>
-  <text class="mono" x="70" y="42">c₀ = 62K · g = 947   (single sample, n=1 — measure your own)</text>
+  <text class="mono" x="70" y="42">c₀ = 62K · g = 947   (single sample, n=1; measure your own)</text>
 
   <!-- grid -->
   <line class="gr" x1="70" y1="300" x2="690" y2="300"/>
@@ -50,17 +50,18 @@
   <text class="lbl" x="381" y="320" text-anchor="middle">160</text>
   <text class="lbl" x="536" y="320" text-anchor="middle">240</text>
   <text class="lbl" x="690" y="320" text-anchor="middle">319</text>
-  <text class="lbl" x="380" y="342" text-anchor="middle">n — assistant turns</text>
+  <text class="lbl" x="380" y="342" text-anchor="middle">n : assistant turns</text>
 
   <!-- markers -->
   <line class="mk" x1="690" y1="37.9" x2="690" y2="300"/>
   <circle cx="690" cy="37.9" r="4" fill="#f85149"/>
-  <text class="hi" x="682" y="30" text-anchor="end">n = 319 → ∫ 68.0M</text>
-  <text class="mono" x="682" y="48" text-anchor="end">~290 turns were chores while waiting</text>
+  <text class="hi" x="682" y="30" text-anchor="end">n = 319  →  ∫ 68.0M</text>
+  <text class="mono" x="682" y="70" text-anchor="end">~290 turns were chores while waiting</text>
 
   <circle cx="128.3" cy="291.2" r="4" fill="#3fb950"/>
-  <text class="lo"  x="140" y="284">n = 30 → ∫ 2.3M</text>
-  <text class="mono" x="140" y="300">dispatch + harvest only  →  97% less</text>
+  <path d="M133,287 L150,216" stroke="#3fb950" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
+  <text class="lo"  x="150" y="190">n = 30  →  ∫ 2.3M</text>
+  <text class="mono" x="150" y="208">dispatch + harvest only  →  97% less</text>
 
-  <text class="mono" x="380" y="366" text-anchor="middle">The gap is not what you wrote — it is how many times the same context was re-read.</text>
+  <text class="mono" x="380" y="366" text-anchor="middle">The gap is not what you wrote. It is how many times the same context was re-read.</text>
 </svg>
