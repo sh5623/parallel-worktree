@@ -96,8 +96,9 @@ flowchart LR
     C --> D["4. SILENCE<br/>0 turns, free"]
     D --> E["5. harvest<br/>rebase → conflicts → gate → push"]
     E --> F["6. still running?<br/>check BEFORE removing"]
-    F --> G["7. update handoff note<br/>(delegated)"]
-    G --> A
+    F --> G["7. handoff note<br/>+ next brief to a FILE"]
+    G --> H["8. CLEAR first<br/>then dispatch at 3"]
+    H --> A
 ```
 
 The user only ever says two things: "spin up the next one" and "harvest it". With the handoff note

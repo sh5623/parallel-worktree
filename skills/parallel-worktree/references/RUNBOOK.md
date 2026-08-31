@@ -518,6 +518,34 @@ progress are in its round file · ⓒ this round's confirmed flakes and their ev
 none) · ⓓ the next dispatch candidates and why that order · ⓔ every blocked entry has a
 **re-measurement trigger** · ⓕ the index line points at the *current* state.
 
+## 10-A. 🔴 The order is "clear first, dispatch second"
+
+The §3 table used to end at ⑦ — *"update the handoff note → dispatch the next round, **or** clear the
+session"* — which **left the order open**. In practice it drifts toward dispatching first (the brief's
+material is right there in your hands), and that costs three things.
+
+| # | What dispatching before clearing loses |
+| --- | --- |
+| ① | 🔴 **The agent you just started dies in the clear.** Per the §0 table a clear kills running subagents, and **the younger the agent, the worse the loss** — zero commits, investigation unfinished, so a §3 resume redoes *the whole investigation*. You kill it at its most expensive moment |
+| ② | **The dispatching turn carries maximum c₀.** A session heavy with harvest output, verdicts and reports is the one writing the brief. Clear first and the same work happens at **minimum context** (§6) |
+| ③ | 🔴 **A thin handoff note never shows up as thin.** *"Can a freshly cleared session dispatch from the handoff note alone?"* is the only real test of its completeness — and dispatching first skips that test. The next session merely watches something already running, so the gap surfaces days later |
+
+✅ **So the order is: ⑦ handoff note + brief *to a file* → ⑧ clear → the new session dispatches at ③.**
+
+### ⚠ "But the brief's material only exists in this session" — which is exactly why you write the brief first
+
+The next brief is usually written from material only this session holds: the spec diff you just read,
+a backend reply, leftovers the harvest exposed, the overlap verdict. That is what tempts you into
+dispatching while you still have it.
+🔴 **The fix is the *brief*, not the dispatch.** This pipeline already delivers briefs as files (§3 ③),
+so writing the brief while the material is in hand lands that material in a file — and the new session
+dispatches from it. If you also **prepare the worktree** (create it, align base, copy ignored env
+files, install deps), the new session dispatches with a single path. Preparing a seat is not starting
+an agent, so it survives the clear.
+
+**The pre-clear checklist gains one line** (after ⓐ–ⓕ in §10): ⓖ **the next round's brief exists as a
+file, and its path is written in the handoff note.** Without that, you are not ready to clear.
+
 ## 11. Opening more sessions does not solve this problem
 
 On the same machine and the same repo, **CPU contention, a shared `.git` (`index.lock`), and serial

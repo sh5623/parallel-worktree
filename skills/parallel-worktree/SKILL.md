@@ -115,7 +115,11 @@ Read `references/ADAPTER-SPEC.md` and follow its tables.
 | ④ | 🔴 **Silence** (0 turns). Wait for the completion signal | §0 ① |
 | ⑤ | Harvest ①–⑨ — rebase · conflicts · gates (**one at a time**) · push | §2 · §4 |
 | ⑥ | **Before** removing a worktree, re-check whether that agent is still running; move round files to `_done/` | §2-A · §9 |
-| ⑦ | Update the handoff note (**delegate it**) → dispatch the next round, or clear the session | §9 · §10 |
+| ⑦ | Update the handoff note (**delegate it**) + **write the next round's brief to a file** (do not dispatch yet) | §9 · §10 |
+| ⑧ | 🔴 **Clear the session FIRST** — the emptied session reads the handoff note and the brief, then dispatches at ③ | **§10-A** |
+
+🔴 **Do not dispatch at ⑦ and clear at ⑧** — the agent you just started dies in the clear.
+The three reasons, and what to do when the brief's material only exists in this session, are in `RUNBOOK.md` **§10-A**.
 
 🔴 **The six places this pipeline fails *silently* are `RUNBOOK.md` §5** — every one of them
 happened with the gates green. Read it once before you start: ① `git checkout` on a file in a
