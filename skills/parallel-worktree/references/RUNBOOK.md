@@ -440,6 +440,37 @@ exhaustiveness hard rules. With a forbidden list, it stops there and reports ins
   upstream as one commit **before** the round, then cut worktrees **on top of that commit**. The
   brief says: "do not run it — if you think you need to, stop and report."
 
+## 🔴 7-A. Two lines right *after* dispatch — a harness-made worktree has neither the base you named nor the brief file
+
+🔴 **Silence (§6-1) begins once the dispatch has *taken*.** The two lines right after the dispatch
+tool call are the exception, and skipping them lets the whole round spin quietly on nothing.
+*(sample, n=1 — 2026-08-25, two tracks at once)*:
+
+- **① The base is wrong.** `git worktree list` showed both worktrees on **the old default branch**,
+  not the upstream commit written in the brief. If the brief's step 0 demands the "expected vs.
+  actual" check and `switch -C <remote>/<upstream>`, the agent corrects itself — **skip that step and
+  it works on a tree with no convention files at all.**
+- **② The brief file does not follow.** A brief kept in a **gitignored folder** such as `.claude/`
+  is absent from the clean checkout `git worktree add` produces — the agent **cannot read the
+  relative path the prompt gave it.** The brief's "if you cannot read it, stop and report" is the
+  only detector. Local `.env*` files are missing for the same reason.
+  ⚠ **Keeping the brief somewhere tracked removes this, but then round output piles up in the team
+  repo** — whichever you choose, **one copy right after dispatch is the cheapest fix.**
+
+✅ **Prescription — this one block right after dispatch (observe and copy only, so it is safe)**:
+```
+git worktree list                       # is the base the upstream you wrote down?
+for w in <worktree glob>; do
+  mkdir -p "$w/<brief folder>"
+  cp <brief files> <runbook> "$w/<brief folder>/"
+  for f in <local env files>; do [ -f "$f" ] && cp "$f" "$w/$f"; done
+done
+```
+⚠ **Copying both tracks' briefs into each worktree is fine** — the forbidden list names the other
+track's scope, so reading each other's brief helps keep them apart. ⚠ **Re-measure each worktree's
+base at harvest** (`git -C <w> log --oneline <upstream base>..HEAD` dragging in someone else's
+commits means the self-correction did not happen).
+
 ## 🔴 8. The work unit — decided by a discriminator, not by a clock
 
 **Upper bound**: the batch-sync loss (max−min) you can tolerate — *(sample, n=1: 41 minutes at
@@ -526,7 +557,7 @@ material is right there in your hands), and that costs three things.
 
 | # | What dispatching before clearing loses |
 | --- | --- |
-| ① | 🔴 **The agent you just started dies in the clear.** Per the §0 table a clear kills running subagents, and **the younger the agent, the worse the loss** — zero commits, investigation unfinished, so a §3 resume redoes *the whole investigation*. You kill it at its most expensive moment |
+| ① | 🔴 **The agent you just started dies in the clear.** Per the §1 table a clear kills running subagents, and **the younger the agent, the worse the loss** — zero commits, investigation unfinished, so a §3 resume redoes *the whole investigation*. You kill it at its most expensive moment |
 | ② | **The dispatching turn carries maximum c₀.** A session heavy with harvest output, verdicts and reports is the one writing the brief. Clear first and the same work happens at **minimum context** (§6) |
 | ③ | 🔴 **A thin handoff note never shows up as thin.** *"Can a freshly cleared session dispatch from the handoff note alone?"* is the only real test of its completeness — and dispatching first skips that test. The next session merely watches something already running, so the gap surfaces days later |
 

@@ -29,6 +29,9 @@ dispatch and harvest were **~30**; the other **~290 were "chores while waiting"*
 is a **97% reduction**. ✅ **Waiting costs 0 turns — it is free.**
 🔴 The only exception is **the user speaking to you**. If a chore is urgent, do it in a
 **separate session** (small n makes the same work cheap there).
+🔴 **Silence starts once the dispatch has taken.** If your previous turn contained a dispatch
+call, this turn is not silent yet: run the post-dispatch check (§3 ③-a — is each base right, copy
+the brief and env files in), then go quiet.
 And 🔴 **the orchestrator does not *write*** — documents, code fixes, reply bodies, and commit
 messages are all delegated.
 
@@ -112,6 +115,7 @@ Read `references/ADAPTER-SPEC.md` and follow its tables.
 | ① | Read the handoff note, then **measure** actual state (running worktrees, commits, uncommitted work) | `RUNBOOK.md` §1 |
 | ② | Pick candidates by priority → separate overlap → fix the **forbidden list** | §7 |
 | ③ | Write the brief **to a file** and dispatch — the prompt carries **only the path**. Worktrees: *observe* if the harness makes them, *create* if it does not | `BRIEF-TEMPLATE.md` · §6-6 · `ADAPTER-SPEC` §2-A |
+| ③-a | 🔴 **The turn after a dispatch is not silent** — `git worktree list`: is each new worktree's base the upstream you named? Then copy the brief, the runbook pointer, and the gitignored env files into each worktree (a gitignored brief folder does not follow into a fresh checkout). Observe and copy only; then go quiet | **§7-A** |
 | ④ | 🔴 **Silence** (0 turns). Wait for the completion signal | §0 ① |
 | ⑤ | Harvest ①–⑨ — rebase · conflicts · gates (**one at a time**) · push | §2 · §4 |
 | ⑥ | **Before** removing a worktree, re-check whether that agent is still running; move round files to `_done/` | §2-A · §9 |
@@ -132,12 +136,13 @@ gets written down (the harness catches this, not the gate — §0 ③).
 
 | When | Read |
 | --- | --- |
+| The turn right after a dispatch (base check · copying the brief and env files in) | `references/RUNBOOK.md` **§7-A only** |
 | Harvesting · resuming a stalled track · conflicts · context budget · lifecycle · sync strategy | `references/RUNBOOK.md` |
 | Writing a brief | `references/BRIEF-TEMPLATE.md` |
 | Setting up · adapter has gone stale · re-measuring project values | `references/ADAPTER-SPEC.md` |
 
-🔴 **Do not read RUNBOOK *ahead of time*** — a turn that only dispatches does not need it. Read it
-on the turn you harvest.
+🔴 **Do not read the harvest procedure *ahead of time*** — the only part a dispatching turn needs is
+§7-A. Read the rest on the turn you harvest.
 
 ## 5. What does *not* belong in this skill
 

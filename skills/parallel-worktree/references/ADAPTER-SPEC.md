@@ -15,7 +15,7 @@ digest. With one file there is one place to fix.
 | File | Location | Why |
 | --- | --- | --- |
 | **The adapter** (agents read it) | **Tracked** — convention: `docs/AGENT-BRIEF.md` or `CONTRIBUTING-agents.md` | Teammates and other machines need it |
-| Round briefs, reports, `_done/` | **Local is fine** (e.g. `.claude/rounds/`) | One operator's working output — but §5's migration check is mandatory |
+| Round briefs, reports, `_done/` | **Local is fine** (e.g. `.claude/rounds/`) | One operator's working output — but `RUNBOOK.md` §9's durable-migration check is mandatory, and a gitignored folder **does not follow into a worktree**: copy the brief in right after dispatch (`RUNBOOK.md` §7-A) |
 | RUNBOOK copy or pointer | Local is fine | Only the orchestrator reads it |
 
 ⚠ **In many projects the adapter must not live under `.claude/`** — the usual `.gitignore`

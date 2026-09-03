@@ -93,7 +93,8 @@ every round.
 flowchart LR
     A["1. measure state<br/>(handoff note + git)"] --> B["2. pick, separate overlap<br/>→ forbidden list"]
     B --> C["3. brief to a FILE<br/>prompt carries the path only"]
-    C --> D["4. SILENCE<br/>0 turns, free"]
+    C --> C2["3a. the turn after dispatch<br/>base right? copy brief + env in"]
+    C2 --> D["4. SILENCE<br/>0 turns, free"]
     D --> E["5. harvest<br/>rebase → conflicts → gate → push"]
     E --> F["6. still running?<br/>check BEFORE removing"]
     F --> G["7. handoff note<br/>+ next brief to a FILE"]
@@ -206,8 +207,8 @@ skills/parallel-worktree/
 ```
 
 The split is deliberate. `SKILL.md` loads on every invocation, so the heavy procedures sit in
-`references/` and get read only on the turn that needs them. A turn that merely dispatches never
-opens RUNBOOK.
+`references/` and get read only on the turn that needs them. The turn that dispatches opens one
+section of RUNBOOK, the post-dispatch check; the harvest procedure waits until you harvest.
 
 ## Contributing
 
