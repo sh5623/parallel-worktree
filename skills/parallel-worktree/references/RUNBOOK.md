@@ -51,15 +51,22 @@ up, **you can hand over the whole worktree**, and the only thing lost is **one a
 ## 2. Harvest — keep the order
 
 ```
+⓪ Still running?    §2-A two-line test — 🔴 BEFORE any rebase. Alive → pin its commit and do ②–⑦ in an
+                    integration worktree (§2-B); a live worktree is never rebased in place
 ① Confirm commits   git -C <w> log --oneline -3 · status --short
-② Align upstream    git fetch <remote> <branch> && git -C <w> rebase <remote>/<branch>
+② Align upstream    git fetch <remote> <branch> && git -C <w> rebase <remote>/<branch>   (finished tracks only)
 ③ Resolve conflicts §4 (append-only doc conflicts are resolved by a tool, not by hand)
 ④ First commit green  If the series was split, verify each commit independently (§5 ②)
 ⑤ Full gate         The adapter's gate commands — 🔴 ONE AT A TIME
 ⑥⑦ Check PRs, push  Query open PRs per the adapter's remote type → git push <remote> <that branch>:<branch>
-⑧ Removal decision  §2-A — only after re-checking "is it still running?"
+⑧ Removal decision  §2-A — re-run ⓪ (the answer can change during ①–⑦)
 ⑨ Realign main      git fetch <remote> && git merge --ff-only <remote>/<branch>
 ```
+
+**Why ⓪ comes first**: a rebase rewrites the worktree it runs in. If the agent is still working there
+— a browser run, a live-call measurement, one more commit — its files change underneath it, its
+uncommitted work blocks the rebase, and its next command targets a tree it did not make. Checking
+only at ⑧ (the older order) protects the *removal* and leaves the *rebase* unprotected.
 
 **The common failure at ②: the worktree's base is stale.** A worktree inherits *the HEAD at
 creation*, so anything you committed to main since then was invisible to the agent *(sample, n=1:
@@ -80,32 +87,58 @@ full suite**. 🔴 **Do not wave it off as "load"; trust green only.** Three fai
 as flakes that way, and one of them touched a surface that had changed that day and could have
 been a real regression — a full re-run *(sample, n=1: 8–15 minutes)* is cheaper than that verdict.
 
-**One-line test for skipping ⑤** (the worktree already ran its own gates — skip if the rebase did
-not touch code; *sample, n=1: saved 10 minutes*):
-`git -C <w> diff --name-only <before rebase>..<after rebase> | grep -E '^(<code>|<e2e>)/'`
-⚠ If that is non-empty, run the full gate. A rebase believed to be "docs only" once touched an e2e
-support file and caused 4 failures.
+**One-line test for skipping ⑤** (the worktree already ran its own gates — skip only if the rebase
+touched nothing the gate reads; *sample, n=1: saved 10 minutes*):
+`git -C <w> diff --name-only <before rebase>..<after rebase> | grep -vE '^(<docs folder>|<round folder>)/'`
+Skip only when that prints **nothing** — every changed file sits inside the documentation-only
+allowlist the adapter names (§1 of the adapter). Anything else runs the full gate, and 🔴 **that
+includes root config and dependency files** (`package.json`, lockfiles, `tsconfig*`, linter and
+test-runner config, CI workflows): they change the gate's result without matching any source path,
+so an allowlist of *code* paths (`^(<code>|<e2e>)/`, the older form of this test) waves them
+through. A rebase believed to be "docs only" once touched an e2e support file and caused 4 failures.
 
-### 🔴 2-A. Before ⑧ removal, re-check whether that agent is still running
+### 🔴 2-A. Is that agent still running? — at ⓪ before the rebase, and again at ⑧ before removal
 
 The harvest verdict (commits present + `status` empty + gates green) reads **git state only**. But
 an agent's remaining work can leave no trace in git — **browser runs, live-call measurements,
-ticket updates**. Remove the worktree in that state and the work dies quietly; the agent ends with
-*"every subsequent command is rejected."*
+ticket updates**. Rebase or remove the worktree in that state and the work dies quietly; the agent
+ends with *"every subsequent command is rejected."*
 
 - *(sample, n=1)*: gates all green and the tree clean, so it was removed — while that agent was
   **re-running the browser flow under a second account**. Its report said *"the worktree vanished,
   so I could not capture ⓐ–ⓒ."* The committed output was intact, but **one entire verification
   axis came back empty.**
-- ✅ **Two-line test** (*before* removal): `<that agent's status in your agent list>` (running means
-  work remains) and `ps -eo etime,command | grep "<that worktree path>" | grep -v grep`.
-  If either is alive, **harvest but do not remove** — **push now, remove after the report lands.**
+- ✅ **Two-line test** (at ⓪ and again *before* removal): `<that agent's status in your agent list>`
+  (running means work remains) and `ps -eo etime,command | grep "<that worktree path>" | grep -v grep`.
+  If either is alive, **harvest through §2-B, do not remove** — **push now, remove after the report
+  lands.**
 - 🔴 **Once the commits are upstream, deferring removal costs nothing** — the branch ref lives in
-  the main repo's `.git`, so you can `cherry-pick` (or use a separate harvest branch) with the
-  worktree still in place.
+  the main repo's `.git`, so the integration worktree of §2-B (or a `cherry-pick` onto a harvest
+  branch) works with the agent's worktree still in place.
 - ⚠ **A "done" notification is not the end.** Agents pause repeatedly for gates and background
   commands, and each pause can emit a notification. **Treat it as running until the final report
   arrives.**
+
+### 🔴 2-B. Harvesting a track that is still running — pin the commit, integrate elsewhere
+
+Never rebase inside a worktree an agent is using. Take **the commit it has**, and do ②–⑦ in a
+throwaway integration worktree that only you touch:
+
+```
+h=$(git -C <w> rev-parse HEAD)                       # pin what you are harvesting
+git worktree add <integration path> "$h"             # a detached worktree on that exact commit
+git -C <integration path> rebase <remote>/<branch>   # ②–⑤ happen here; the agent's tree is untouched
+git -C <integration path> push <remote> HEAD:<branch>
+git worktree remove <integration path>
+```
+
+- Anything the agent commits **after** the pin is simply the next harvest — re-run ⓪–⑨ when its
+  final report lands.
+- Send the agent one line: *"harvested up to `<h>`; keep going, do not rebase"* (§3 already forbids
+  agents rebasing — this prevents it from re-doing the conflict resolution you just did).
+- The integration worktree needs the same dependency tree as a gate run; symlink or install it as
+  the adapter's §0 says. If that cost is too high, ⓪ has a cheaper answer: **wait**. Waiting is 0
+  turns (§6-1), and the track will finish.
 
 ### When ⑦/⑧ get stuck
 
@@ -297,12 +330,17 @@ that grew context most accounted for only **29% of total growth** (89K of 302K),
 results together were **0.4 MB**. Every turn added ~947 tokens, and 319 of them compounded
 **quadratically**.
 
-### 🔴 6-1. Rule one — while worktrees run, the orchestrator does *nothing*
+### 🔴 6-1. Rule one — while worktrees run, the orchestrator does no *chores*
 *(sample, n=1)*: of 319 turns, dispatch and harvest were **~30**; the other **~290 were chores while
-waiting** (fixing tooling, replying to tickets, taking measurements, writing docs). **At n=30,
-∫ = 2.3M — a 97% reduction.** ✅ **Waiting is free (0 turns)** — it is the cheapest thing you can do.
-🔴 The only exception is **the user speaking to you**. If a chore is urgent, do it in a **separate
-session**, where small n makes the same work far cheaper.
+waiting** (fixing tooling, replying to tickets, taking measurements, writing docs). **Re-evaluating
+the same c₀ and g at n=30 gives ∫ = 2.3M — 97% less, as a model value**; no second session was
+measured at n=30, so treat the 97% as the shape of the curve, not as a measured saving.
+✅ **Waiting is free (0 turns)** — it is the cheapest thing you can do.
+What the rule forbids is **polling and chores** — re-checking status, fixing tooling, replying to
+tickets, writing docs. It does not forbid the turns the round itself needs: the post-dispatch check
+(§7-A), **the user speaking to you**, and an agent that reports it is blocked or stalled (§3 —
+answering that in one turn is cheaper than the resume it would otherwise become). If a chore is
+urgent, do it in a **separate session**, where small n makes the same work far cheaper.
 
 ### 6-2. Four ways to cut turns
 ① **Batch independent tool calls into one message** (parallel = **1 turn**; splitting three into
@@ -326,15 +364,25 @@ compounds. ✅ An isolation measurement from the same sample shows it from anoth
 | Writing commit messages — if you must commit, **delegate that commit too** | git operations (fetch, rebase, push, worktree) |
 | Editing long artifacts | Running tools + **grepping out only the lines you need** · asking the user |
 
-🔴 **Adjudication cannot be delegated** — *"never ask an agent to verify someone else's
-measurement"*: it cannot vouch for a claim it did not produce. In the observed case the agent was
-right to refuse: *"If I confirm it, I am putting my name on a measurement that is not mine."* What
-you delegate is **gathering material and writing**; **what is true is yours to decide.**
+🔴 **Delegate the reproduction, keep the verdict.** An agent can re-measure independently — its own
+run, its own numbers — and that is a legitimate delegation. What it cannot do is *confirm* someone
+else's measurement: it cannot vouch for a claim it did not produce, and in the observed case the
+agent was right to refuse (*"If I confirm it, I am putting my name on a measurement that is not
+mine."*). So phrase the delegation as "reproduce this and report what you got", never as "verify
+that this is right" — and **what is true is yours to decide** from the reproductions.
 
 ### 6-4. Redirect long tool output to a file and grep it (⚠ this is **not** the dominant term)
 🔴 **Always redirect commands with long output and look only at the lines you need to adjudicate** —
 *(sample, n=1: a 96 KB full unit-suite output, ≈24K tokens, reduced to **4 lines** ≈0.1K — 240×)*.
-`<gate> > /tmp/t.log 2>&1; grep -E '<summary pattern>' /tmp/t.log | tail -4`
+```
+<gate> > /tmp/t.log 2>&1; rc=$?
+grep -E '<summary pattern>' /tmp/t.log | tail -4; echo "gate rc=$rc"; exit $rc
+```
+🔴 **Save the exit code on the line that runs the gate.** The one-liner
+`<gate> > log; grep … | tail …` returns **`tail`'s** status, so a gate that failed with 23 comes back
+as 0, and the four summary lines are then the only thing that can tell you — and a summary pattern
+that does not match prints nothing at all. Adjudicate on `rc` first, and on the lines second (`exit
+$rc` hands the real status back when the block runs as a script or subshell).
 ⚠ **Not the dominant term** — all tool results together were 0.4 MB (6-0). **Look at turn count
 (6-1, 6-2) first.**
 
@@ -355,6 +403,11 @@ Pasting the body into the dispatch prompt is **double transmission** *(sample, n
 pure waste per round — written to the file and to the prompt)*. The shape is one line:
 "Read `<brief path>`. That is your brief. **If you cannot read it, stop and report.**" That last
 clause is what closes the branch where the agent cannot read it and starts guessing.
+🔴 **The path must resolve on the agent's first turn** — so it is an **absolute** path when the
+harness creates the worktree at dispatch (a relative path resolves inside a fresh checkout where a
+gitignored brief folder does not exist), and the file is in place **before** the dispatch call, not
+copied in on the turn after (§7-A). Otherwise the "stop and report" clause fires on a round that
+was fine.
 
 ### 6-7. Splitting sessions — **only while c₀ is small, and only *before* it becomes a mega-session**
 | Sample | k=2 | k=4 | k=8 | k=16 |
@@ -440,7 +493,22 @@ exhaustiveness hard rules. With a forbidden list, it stops there and reports ins
   upstream as one commit **before** the round, then cut worktrees **on top of that commit**. The
   brief says: "do not run it — if you think you need to, stop and report."
 
-## 🔴 7-A. Two lines right *after* dispatch — a harness-made worktree has neither the base you named nor the brief file
+## 🔴 7-A. Before and right *after* dispatch — the brief must be readable on the agent's first turn, and a harness-made worktree has neither the base you named nor the brief file
+
+### Before dispatch — prepare, verify, then dispatch
+
+The brief's *"if you cannot read it, stop and report"* (§6-6) is the detector for a missing brief.
+It only works if the brief is readable **at the moment the agent starts**: copying it in on the turn
+*after* dispatch is a race the agent can win by reading first — and then it stops, correctly, on a
+round that was fine. So the order is **prepare → verify → dispatch**, and the two branches of Q0
+(`ADAPTER-SPEC.md` §2-A) prepare differently:
+
+| Who makes the worktree | Before the dispatch call | The brief path in the prompt |
+| --- | --- | --- |
+| **You** (Q0: the harness does not) | `git worktree add` on the upstream tip · copy the brief, the runbook pointer, and the gitignored env files in · `ls "$w/<brief folder>/"` to verify | A path inside the worktree is fine — it exists before the agent does |
+| **The harness, at dispatch** (Q0: yes) | You cannot copy into a worktree that does not exist yet. Put the brief where **any** checkout can read it: an **absolute path in the main tree** or outside the repo · `ls <absolute brief path>` to verify | 🔴 **That absolute path, never a relative one** — a relative path resolves inside the fresh worktree, where a gitignored brief folder is absent. If the harness exposes the worktree path *before* the agent's first turn (a readiness signal), you may copy in on it; otherwise the absolute path is the only channel that cannot race |
+
+### Right after dispatch — two lines that catch what preparation cannot
 
 🔴 **Silence (§6-1) begins once the dispatch has *taken*.** The two lines right after the dispatch
 tool call are the exception, and skipping them lets the whole round spin quietly on nothing.
@@ -451,11 +519,12 @@ tool call are the exception, and skipping them lets the whole round spin quietly
   actual" check and `switch -C <remote>/<upstream>`, the agent corrects itself — **skip that step and
   it works on a tree with no convention files at all.**
 - **② The brief file does not follow.** A brief kept in a **gitignored folder** such as `.claude/`
-  is absent from the clean checkout `git worktree add` produces — the agent **cannot read the
-  relative path the prompt gave it.** The brief's "if you cannot read it, stop and report" is the
-  only detector. Local `.env*` files are missing for the same reason.
-  ⚠ **Keeping the brief somewhere tracked removes this, but then round output piles up in the team
-  repo** — whichever you choose, **one copy right after dispatch is the cheapest fix.**
+  is absent from the clean checkout `git worktree add` produces. With the absolute path from the
+  table above the agent still reads it; the copy below gives it a tree-local copy too (and the local
+  `.env*` files, which are missing for the same reason). Before this section had the table, the
+  copy *was* the fix — and the agent that read first hit "stop and report" on a good round.
+  ⚠ **Keeping the brief somewhere tracked removes ② entirely, but then round output piles up in the
+  team repo** — whichever you choose, **the absolute path plus one copy is the cheapest shape.**
 
 ✅ **Prescription — this one block right after dispatch (observe and copy only, so it is safe)**:
 ```
@@ -495,7 +564,7 @@ not a refusal but a **resume signal**).
 
 | Stage | When | File |
 | --- | --- | --- |
-| ① Create | Just before dispatch | `round-NN-X-<slug>.md` — skeleton in `BRIEF-TEMPLATE.md`. 🔴 The prompt carries **the path only** (§6-6) |
+| ① Create | Before dispatch — in place and verified readable first (§7-A) | `round-NN-X-<slug>.md` — skeleton in `BRIEF-TEMPLATE.md`. 🔴 The prompt carries **the path only** (§6-6), absolute when the harness makes the worktree |
 | ② Update progress | Just before clearing · on detecting a stall (§1) | The header table plus the "progress, measured" block in the same file |
 | ③ Report created | When the agent finishes | `round-NN-X-REPORT.md` full text + 12 lines in chat (§6-5 owns the rule) |
 | ④ Move to `_done/` | **After harvest and push (§2 ⑦)** | Only once it passes the migration check below |

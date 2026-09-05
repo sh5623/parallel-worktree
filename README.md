@@ -21,10 +21,12 @@ quadratically if you fill the waiting time with chores.
 An orchestrator session's context integral is `∫ = c₀·n + g·n²/2`, quadratic in turn count. Doing
 chores while worktrees run is what makes n large.
 
-<p align="center"><img src="docs/assets/cost-curve.svg" alt="Context integral against turn count: 68.0M at 319 turns versus 2.3M at 30 turns" width="740"></p>
+<p align="center"><img src="docs/assets/cost-curve.svg" alt="Context integral against turn count: 68.0M measured at 319 turns; 2.3M is the same model evaluated at 30 turns" width="740"></p>
 
-Same work, same day, same machine. The entire difference is whether the orchestrator stayed quiet
-while the agents ran.
+One session, measured at 319 turns. The 30-turn point is not a second run: it is that session's own
+cost model (its measured c₀ and g) re-evaluated at the roughly 30 turns that were dispatch and
+harvest. What the model says is that the whole gap is whether the orchestrator stayed quiet while
+the agents ran. Nobody has yet measured a full round at n=30 — see [Contributing](#contributing).
 
 <p align="center"><img src="docs/assets/cost-split.svg" alt="The n-squared term is 71 percent of the integral; cache reads are 64 percent of billing" width="740"></p>
 
@@ -92,11 +94,11 @@ every round.
 ```mermaid
 flowchart LR
     A["1. measure state<br/>(handoff note + git)"] --> B["2. pick, separate overlap<br/>→ forbidden list"]
-    B --> C["3. brief to a FILE<br/>prompt carries the path only"]
+    B --> C["3. brief to a FILE, in place BEFORE dispatch<br/>prompt carries the path only"]
     C --> C2["3a. the turn after dispatch<br/>base right? copy brief + env in"]
     C2 --> D["4. SILENCE<br/>0 turns, free"]
-    D --> E["5. harvest<br/>rebase → conflicts → gate → push"]
-    E --> F["6. still running?<br/>check BEFORE removing"]
+    D --> E["5. harvest: still running? pin its commit<br/>rebase → conflicts → gate → push"]
+    E --> F["6. still running? re-check<br/>BEFORE removing"]
     F --> G["7. handoff note<br/>+ next brief to a FILE"]
     G --> H["8. CLEAR first<br/>then dispatch at 3"]
     H --> A
@@ -129,6 +131,7 @@ values to adopt. Anything marked `(sample, n=1)` has not been reproduced anywher
 | Number you will see | Treat it as |
 | --- | --- |
 | `c₀ 62K`, `g 947`, `∫ 68.0M` | Measure your own. The method is in `RUNBOOK.md` 6-0. |
+| "97% less at n=30" | A model value: the same session's c₀ and g evaluated at 30 turns. No second session was measured. |
 | "2 concurrent worktrees" | A starting point. Your cap is a property of your machine, so it belongs in the adapter (Q9). |
 | "30 to 45 minutes per work unit" | Re-derive it from your own c₀, g, and gate duration |
 | "gates take 8 to 15 minutes" | Measure it. It sets your harvest window. |
@@ -208,13 +211,25 @@ skills/parallel-worktree/
 
 The split is deliberate. `SKILL.md` loads on every invocation, so the heavy procedures sit in
 `references/` and get read only on the turn that needs them. The turn that dispatches opens one
-section of RUNBOOK, the post-dispatch check; the harvest procedure waits until you harvest.
+section of RUNBOOK, the dispatch preparation and post-dispatch check; the harvest procedure waits
+until you harvest.
 
 ## Contributing
 
 See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). The most useful contribution is a second
 data point. If you measure your own `c₀`, `g`, concurrency cap, or gate duration, open an issue with
 the numbers and the method. Everything in here is currently n=1.
+
+A cross-repo review in September 2026 filed four defects against this skill with file and line, and
+v0.4.0 is the fix: the `SKILL.md` frontmatter was not valid YAML (an unquoted `trouble:` in the
+description, which drops the metadata that triggers the skill), the gate-skip test let root config
+changes through, the log-and-grep one-liner discarded the gate's exit code, the brief was copied into
+the worktree one turn *after* the agent could already have tried to read it, and the still-running
+check came after the rebase that rewrites the agent's tree. Each one was reproduced before it was
+accepted. The same review asked for two rules to be narrowed, and they were: silence now forbids
+chores and polling rather than every turn, and delegation of a *reproduction* is allowed while the
+verdict stays with the orchestrator. A GitHub Actions workflow now parses every skill's frontmatter
+and runs `claude plugin validate --strict` on each push, so the first of those cannot ship again.
 
 ## License
 

@@ -15,7 +15,7 @@ digest. With one file there is one place to fix.
 | File | Location | Why |
 | --- | --- | --- |
 | **The adapter** (agents read it) | **Tracked** — convention: `docs/AGENT-BRIEF.md` or `CONTRIBUTING-agents.md` | Teammates and other machines need it |
-| Round briefs, reports, `_done/` | **Local is fine** (e.g. `.claude/rounds/`) | One operator's working output — but `RUNBOOK.md` §9's durable-migration check is mandatory, and a gitignored folder **does not follow into a worktree**: copy the brief in right after dispatch (`RUNBOOK.md` §7-A) |
+| Round briefs, reports, `_done/` | **Local is fine** (e.g. `.claude/rounds/`) | One operator's working output — but `RUNBOOK.md` §9's durable-migration check is mandatory, and a gitignored folder **does not follow into a worktree**: give the agent an **absolute** brief path that exists before dispatch, and copy the brief in right after (`RUNBOOK.md` §7-A) |
 | RUNBOOK copy or pointer | Local is fine | Only the orchestrator reads it |
 
 ⚠ **In many projects the adapter must not live under `.claude/`** — the usual `.gitignore`
@@ -136,7 +136,7 @@ with no logged-in account.
 > **only this repo's concrete values.**
 
 ## 0. Worktree alignment — <<expected base · fetch/switch · install deps · is the conventions folder present · gitignored files to copy>>
-## 1. Gates — <<command order · measured duration · hook timeout · full-suite e2e rule · procedure for adjudicating a single failure>>
+## 1. Gates — <<command order · measured duration · hook timeout · full-suite e2e rule · procedure for adjudicating a single failure · the documentation-only paths a rebase may touch without re-running the gate (RUNBOOK §2 ⑤ — never root config or dependency files)>>
 ## 2. Commits — <<message format · when splitting, "every commit green on its own" · 🔴 do not push (the caller does)>>
 ## 3. Overlap — <<append-only table for shared files + frozen list + generated artifacts are read-only>>
 ## 4. Counting is a job for tools (hand counts are always wrong) — <<count/audit commands, or "none">>

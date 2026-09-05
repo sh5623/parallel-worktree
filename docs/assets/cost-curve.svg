@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 380" width="740" height="380" role="img" aria-labelledby="t d">
   <title id="t">Orchestrator context integral against turn count</title>
-  <desc id="d">The context integral grows quadratically with turn count. At n=319 turns it reaches 68.0M; at n=30 turns it is 2.3M, a 97 percent reduction. Single sample.</desc>
+  <desc id="d">The context integral grows quadratically with turn count. At n=319 turns it reaches 68.0M (measured); the same model evaluated at n=30 turns gives 2.3M, 97 percent less. Single sample; the 30-turn point is modelled, not a second run.</desc>
   <style>
     .ax  { stroke:#7d8590; stroke-width:1.2; fill:none }
     .gr  { stroke:#7d8590; stroke-width:.6; opacity:.22; fill:none }
@@ -60,8 +60,8 @@
 
   <circle cx="128.3" cy="291.2" r="4" fill="#3fb950"/>
   <path d="M133,287 L150,216" stroke="#3fb950" stroke-width="1" stroke-dasharray="3 3" fill="none"/>
-  <text class="lo"  x="150" y="190">n = 30  →  ∫ 2.3M</text>
-  <text class="mono" x="150" y="208">dispatch + harvest only  →  97% less</text>
+  <text class="lo"  x="150" y="190">n = 30  →  ∫ 2.3M  (model, not a second run)</text>
+  <text class="mono" x="150" y="208">dispatch + harvest only  →  97% less, from the same c₀ and g</text>
 
   <text class="mono" x="380" y="366" text-anchor="middle">The gap is not what you wrote. It is how many times the same context was re-read.</text>
 </svg>

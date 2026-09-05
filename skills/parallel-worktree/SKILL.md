@@ -1,6 +1,12 @@
 ---
 name: parallel-worktree
-description: Use when running two or more coding subagents at once in isolated git worktrees and pulling their commits back upstream — "spin up a worktree", "run these in parallel", "dispatch the next task", "harvest that branch", "start the next one when this finishes", "set up parallel agents on this project too". Also use when a parallel round is already in trouble: worktrees left running with no commits, a rebase full of doc conflicts, gates that pass but skipped files, or an orchestrator session whose context keeps ballooning.
+description: >-
+  Use when running two or more coding subagents at once in isolated git worktrees and pulling
+  their commits back upstream — "spin up a worktree", "run these in parallel", "dispatch the next
+  task", "harvest that branch", "start the next one when this finishes", "set up parallel agents on
+  this project too". Also use when a parallel round is already in trouble — worktrees left running
+  with no commits, a rebase full of doc conflicts, gates that pass but skipped files, or an
+  orchestrator session whose context keeps ballooning.
 ---
 
 # parallel-worktree
@@ -23,24 +29,29 @@ single invocation (that cost structure is `RUNBOOK.md` §6-0).
 
 ## 🔴 0. Three rules that hold on every invocation
 
-### ① Silence — while worktrees are running, the orchestrator does *nothing*
+### ① Silence — while worktrees are running, the orchestrator does no *chores*
 The dominant cost term is the turn count n (∫ = c₀·n + g·n²/2). *(sample, n=1)*: of 319 turns,
-dispatch and harvest were **~30**; the other **~290 were "chores while waiting"**. At n=30 that
-is a **97% reduction**. ✅ **Waiting costs 0 turns — it is free.**
-🔴 The only exception is **the user speaking to you**. If a chore is urgent, do it in a
-**separate session** (small n makes the same work cheap there).
+dispatch and harvest were **~30**; the other **~290 were "chores while waiting"**. Re-evaluating
+that session's own c₀ and g at n=30 gives a **97% smaller integral** — a modelled figure from one
+session, not a second measured run. ✅ **Waiting costs 0 turns — it is free.**
+What silence forbids is **polling and chores**: re-checking status, fixing tooling, replying to
+tickets, writing docs. It does not forbid the turns the round itself needs — the post-dispatch
+check (§3 ③-a), **the user speaking to you**, and an agent reporting that it is blocked or stalled
+(`RUNBOOK.md` §3). If a chore is urgent, do it in a **separate session** (small n makes the same
+work cheap there).
 🔴 **Silence starts once the dispatch has taken.** If your previous turn contained a dispatch
 call, this turn is not silent yet: run the post-dispatch check (§3 ③-a — is each base right, copy
 the brief and env files in), then go quiet.
 And 🔴 **the orchestrator does not *write*** — documents, code fixes, reply bodies, and commit
 messages are all delegated.
 
-### ② Adjudication cannot be delegated
-*"Never ask an agent to verify someone else's measurement — it cannot vouch for a claim it did
-not produce."* An agent correctly refused exactly this: *"If I confirm it, I am putting my name
-on a measurement that is not mine."* What you delegate is **gathering material and writing**;
-**what is true is yours to decide.** Hand that off and the round stalls at the point where an
-agent is right to refuse.
+### ② Delegate the reproduction, keep the verdict
+An agent can **reproduce** a measurement independently — its own run, its own numbers — and that
+is fine to delegate. What it cannot do is **vouch for a claim it did not produce**: an agent
+correctly refused exactly that (*"If I confirm it, I am putting my name on a measurement that is
+not mine."*). So ask for a fresh reproduction, never a confirmation — and **the verdict on what is
+true stays yours**, whichever way the reproductions come out. Hand the verdict itself off and the
+round stalls at the point where an agent is right to refuse.
 
 ### ③ Safety and permission checks are not routed around, and the workaround is not written down
 🔴 If a tool is blocked by a permission or safety classifier, **do not look for another path
@@ -114,11 +125,11 @@ Read `references/ADAPTER-SPEC.md` and follow its tables.
 | --- | --- | --- |
 | ① | Read the handoff note, then **measure** actual state (running worktrees, commits, uncommitted work) | `RUNBOOK.md` §1 |
 | ② | Pick candidates by priority → separate overlap → fix the **forbidden list** | §7 |
-| ③ | Write the brief **to a file** and dispatch — the prompt carries **only the path**. Worktrees: *observe* if the harness makes them, *create* if it does not | `BRIEF-TEMPLATE.md` · §6-6 · `ADAPTER-SPEC` §2-A |
-| ③-a | 🔴 **The turn after a dispatch is not silent** — `git worktree list`: is each new worktree's base the upstream you named? Then copy the brief, the runbook pointer, and the gitignored env files into each worktree (a gitignored brief folder does not follow into a fresh checkout). Observe and copy only; then go quiet | **§7-A** |
+| ③ | Write the brief **to a file** and dispatch — the prompt carries **only the path**. 🔴 The brief is readable **before** the agent's first turn: if you create the worktrees, prepare them (base · brief · env) before dispatching; if the harness creates them at dispatch, the prompt carries an **absolute path outside the worktree** | `BRIEF-TEMPLATE.md` · §6-6 · **§7-A** · `ADAPTER-SPEC` §2-A |
+| ③-a | 🔴 **The turn after a dispatch is not silent** — `git worktree list`: is each new worktree's base the upstream you named? Then copy the brief, the runbook pointer, and the gitignored env files into each worktree (a convenience copy — the agent's reading path is the one from ③). Observe and copy only; then go quiet | **§7-A** |
 | ④ | 🔴 **Silence** (0 turns). Wait for the completion signal | §0 ① |
-| ⑤ | Harvest ①–⑨ — rebase · conflicts · gates (**one at a time**) · push | §2 · §4 |
-| ⑥ | **Before** removing a worktree, re-check whether that agent is still running; move round files to `_done/` | §2-A · §9 |
+| ⑤ | Harvest ⓪–⑨ — ⓪ **is the agent still running?** A live worktree is never rebased in place: harvest it from an integration worktree pinned to its commit · rebase · conflicts · gates (**one at a time**) · push | §2 · §2-B · §4 |
+| ⑥ | **Before** removing a worktree, re-check ⓪ (the answer can change during the harvest); move round files to `_done/` | §2-A · §9 |
 | ⑦ | Update the handoff note (**delegate it**) + **write the next round's brief to a file** (do not dispatch yet) | §9 · §10 |
 | ⑧ | 🔴 **Clear the session FIRST** — the emptied session reads the handoff note and the brief, then dispatches at ③ | **§10-A** |
 
@@ -136,7 +147,7 @@ gets written down (the harness catches this, not the gate — §0 ③).
 
 | When | Read |
 | --- | --- |
-| The turn right after a dispatch (base check · copying the brief and env files in) | `references/RUNBOOK.md` **§7-A only** |
+| Preparing a dispatch and the turn right after it (brief path · base check · copying the brief and env files in) | `references/RUNBOOK.md` **§7-A only** |
 | Harvesting · resuming a stalled track · conflicts · context budget · lifecycle · sync strategy | `references/RUNBOOK.md` |
 | Writing a brief | `references/BRIEF-TEMPLATE.md` |
 | Setting up · adapter has gone stale · re-measuring project values | `references/ADAPTER-SPEC.md` |

@@ -3,6 +3,9 @@
 > 🔴 **Deliver it as a file only — never paste the body into the prompt** (double transmission;
 > *sample, n=1: ≈8K tokens wasted per round*). The prompt is one line:
 > "Read `<<brief path>>`. That is your brief. **If you cannot read it, stop and report.**"
+> 🔴 The file exists and is readable **before** the dispatch call, and `<<brief path>>` is
+> **absolute** when the harness creates the worktree at dispatch (`RUNBOOK.md` §7-A) — otherwise
+> that last clause fires on a round that was fine.
 > This file is **the handoff that survives an empty session** — harvesting, resuming, and
 > lifecycle belong to `RUNBOOK.md`.
 > `<<...>>` marks a slot to fill. **Do not put shared content here — tell the agent to read the adapter.**

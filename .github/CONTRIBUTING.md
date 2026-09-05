@@ -67,6 +67,19 @@ To try a change locally before opening a PR, point Claude Code at your clone:
 Then run an actual round with it. **A change that has not been used in a real round is not ready** —
 this skill's whole premise is that the failure modes are the ones you do not notice.
 
+Two mechanical checks run in CI on every push and pull request
+(`.github/workflows/validate.yml`), and you can run them locally first:
+
+```bash
+claude plugin validate . --strict        # both manifests
+ruby -ryaml -e 'f=File.read("skills/parallel-worktree/SKILL.md"); YAML.safe_load(f[/\A---\n(.*?)\n---\n/m,1]); puts "frontmatter ok"'
+```
+
+The second one exists because a `description:` containing an unquoted `word:` once shipped as
+invalid YAML — the skill still loaded, but with no metadata, so nothing could trigger it. Any
+frontmatter that fails to parse fails the build. Keep multi-sentence descriptions in a `>-` block
+scalar.
+
 Commit messages: a short imperative subject, and a body that says what changed and why. If the
 change is driven by a measurement, put the number in the body.
 

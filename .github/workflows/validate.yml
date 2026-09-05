@@ -1,0 +1,41 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Every skill and agent frontmatter must parse as YAML. An unquoted "word:" inside a
+      # description used to ship as invalid YAML: the skill body still loaded, but its metadata
+      # (name, description) was dropped, so nothing could trigger it.
+      - name: Parse skill frontmatter
+        run: |
+          set -e
+          found=0
+          for f in $(git ls-files 'skills/*/SKILL.md' 'agents/*.md'); do
+            found=1
+            ruby -ryaml -e '
+              src = File.read(ARGV[0])
+              fm  = src[/\A---\n(.*?)\n---\n/m, 1] or abort("#{ARGV[0]}: no frontmatter block")
+              data = YAML.safe_load(fm)
+              %w[name description].each { |k| abort("#{ARGV[0]}: missing #{k}") unless data[k].is_a?(String) && !data[k].strip.empty? }
+              puts "ok  #{ARGV[0]}"
+            ' "$f"
+          done
+          [ "$found" = 1 ] || { echo "no skill or agent files found"; exit 1; }
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin and marketplace manifests
+        run: claude plugin validate . --strict
