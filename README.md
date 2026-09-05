@@ -26,7 +26,7 @@ chores while worktrees run is what makes n large.
 One session, measured at 319 turns. The 30-turn point is not a second run: it is that session's own
 cost model (its measured c₀ and g) re-evaluated at the roughly 30 turns that were dispatch and
 harvest. What the model says is that the whole gap is whether the orchestrator stayed quiet while
-the agents ran. Nobody has yet measured a full round at n=30 — see [Contributing](#contributing).
+the agents ran. Nobody has yet measured a full round at n=30; see [Contributing](#contributing).
 
 <p align="center"><img src="docs/assets/cost-split.svg" alt="The n-squared term is 71 percent of the integral; cache reads are 64 percent of billing" width="740"></p>
 
@@ -158,7 +158,7 @@ Or install this repo directly, without the marketplace:
 /reload-plugins
 ```
 
-No hooks, no agents, no dependencies. It is one skill and three reference files. Copying the folder
+There are no hooks, agents, or dependencies: one skill and three reference files. Copying the folder
 into `~/.claude/skills/` or a project's `.claude/skills/` works just as well.
 
 ## Your first round
@@ -220,7 +220,7 @@ See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md). The most useful contri
 data point. If you measure your own `c₀`, `g`, concurrency cap, or gate duration, open an issue with
 the numbers and the method. Everything in here is currently n=1.
 
-A cross-repo review in September 2026 filed four defects against this skill with file and line, and
+A cross-repo review in September 2026 filed five defects against this skill with file and line, and
 v0.4.0 is the fix: the `SKILL.md` frontmatter was not valid YAML (an unquoted `trouble:` in the
 description, which drops the metadata that triggers the skill), the gate-skip test let root config
 changes through, the log-and-grep one-liner discarded the gate's exit code, the brief was copied into

@@ -1,7 +1,7 @@
 {
   "name": "parallel-worktree",
   "description": "Run subagents in parallel across isolated worktrees and harvest their commits upstream — bootstrap, dispatch, overlap separation, rebase, gate, push, cleanup. Includes the six places this pipeline fails silently and the orchestrator's context budget. Harness- and stack-agnostic.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Seungho",
     "email": "seungho5623@gmail.com"
